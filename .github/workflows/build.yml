@@ -71,7 +71,7 @@ jobs:
           action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl \
-            -u $notify_cred \
+            -u :$notify_cred \
             -H "Title: geosvc built" \
             -H "Tags: octopus" \
             -H "Priority: 3" \
@@ -88,7 +88,7 @@ jobs:
           action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl \
-            -u $notify_cred \
+            -u :$notify_cred \
             -H "Title: geosvc wasn't built" \
             -H "Tags: cursing_face" \
             -H "Priority: 4" \
