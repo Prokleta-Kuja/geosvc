@@ -1,0 +1,98 @@
+name: Build
+
+env:
+  REGISTRY_IMAGE: ghcr.io/prokleta-kuja/geosvc
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate env variables
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+          echo "DATE=$(date +'%Y-%m-%d')" >> ${GITHUB_ENV}
+          echo "VERSION=$(date +'%Y.%m.%d')-${GITHUB_RUN_NUMBER}" >> ${GITHUB_ENV}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Restore dependencies
+        working-directory: src
+        run: dotnet restore
+      - name: Build
+        working-directory: src
+        run: dotnet build --no-restore
+      - name: Publish
+        working-directory: src
+        run: dotnet publish /p:Version=${{ env.VERSION }} -c Release --no-restore -o out
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY_IMAGE }}:latest
+            ${{ env.REGISTRY_IMAGE }}:${{ env.DATE }}
+            ${{ env.REGISTRY_IMAGE }}:${{ github.RUN_NUMBER }}
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [build]
+    steps:
+      - name: Success
+        if: ${{ needs.build.result == 'success' }}
+        continue-on-error: true
+        env:
+          notify_cred: ${{ secrets.NOTIFY_CRED }}
+          notify_url: ${{ secrets.NOTIFY_URL }}
+          action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl \
+            -u $notify_cred \
+            -H "Title: geosvc built" \
+            -H "Tags: octopus" \
+            -H "Priority: 3" \
+            -H "Actions: view, GitHub, $action_url, clear=true; \
+            -H "Content-Type: text/plain" \
+            -d $'${{ github.REPOSITORY }} built.' \
+            $notify_url
+      - name: Failure
+        if: ${{ needs.build.result == 'failure' }}
+        continue-on-error: true
+        env:
+          notify_cred: ${{ secrets.NOTIFY_CRED }}
+          notify_url: ${{ secrets.NOTIFY_URL }}
+          action_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl \
+            -u $notify_cred \
+            -H "Title: geosvc wasn't built" \
+            -H "Tags: cursing_face" \
+            -H "Priority: 4" \
+            -H "Actions: view, GitHub, $action_url" \
+            -H "Content-Type: text/plain" \
+            -d $'${{ github.REPOSITORY }} built.' \
+            $notify_url
