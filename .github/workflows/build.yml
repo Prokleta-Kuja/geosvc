@@ -75,7 +75,7 @@ jobs:
             -H "Title: geosvc built" \
             -H "Tags: octopus" \
             -H "Priority: 3" \
-            -H "Actions: view, GitHub, $action_url, clear=true; \
+            -H "Actions: view, GitHub, $action_url, clear=true;" \
             -H "Content-Type: text/plain" \
             -d $'${{ github.REPOSITORY }} built.' \
             $notify_url
@@ -92,7 +92,7 @@ jobs:
             -H "Title: geosvc wasn't built" \
             -H "Tags: cursing_face" \
             -H "Priority: 4" \
-            -H "Actions: view, GitHub, $action_url" \
+            -H "Actions: view, GitHub, $action_url, clear=true;" \
             -H "Content-Type: text/plain" \
             -d $'${{ github.REPOSITORY }} built.' \
             $notify_url
