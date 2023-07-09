@@ -43,7 +43,7 @@ public static class GeoLite2
         if (staleDbs || statusCountries == null || C.Countries.Except(statusCountries).Count() > 0)
             newLastModified = GetOldestDateTime(newLastModified, await UpdateCountryBlocksAsync(newLastModified));
         else
-            Log.Information("No change in country block or not stale yet ({Stale}), skipping download", staleDate);
+            Log.Information("No change in country blocks or not stale yet ({Stale}), skipping download", staleDate);
 
         var countryBlockFiles = Directory.EnumerateFiles(C.Paths.Root, $"*{FILE_BLOCKS_EXTENSION}");
         foreach (var countryBlockFile in countryBlockFiles)
@@ -65,7 +65,7 @@ public static class GeoLite2
             statusInfo.CreationTimeUtc = newLastModified.Value;
         }
     }
-    public static async Task<HashSet<string>> GetBlocksFor(string countryCode)
+    public static async Task<HashSet<string>> GetBlocksForAsync(string countryCode)
     {
         var info = new FileInfo(GetCountryBlocksFilePath(countryCode));
         if (!info.Exists)

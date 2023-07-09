@@ -17,7 +17,7 @@ internal class Program
         try
         {
             Directory.CreateDirectory(C.Paths.Root);
-            //await GeoLite2.UpdateAsync();
+            await GeoLite2.UpdateAsync();
             await Tik.UpdateAsync();
             return 0;
         }
@@ -32,25 +32,3 @@ internal class Program
         }
     }
 }
-
-// var tikAuth = Environment.GetEnvironmentVariable("TIK_AUTH");
-// if (string.IsNullOrWhiteSpace(tikAuth))
-//     throw new ArgumentNullException(nameof(tikAuth));
-// var tikIp = Environment.GetEnvironmentVariable("TIK_IP");
-// if (string.IsNullOrWhiteSpace(tikIp))
-//     throw new ArgumentNullException(nameof(tikIp));
-
-// using var handler = new HttpClientHandler { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator };
-// using var client = new HttpClient(handler);
-// client.BaseAddress = new Uri($"https://{tikIp}/rest/");
-// client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", tikAuth);
-
-// // var response = await client.GetAsync("system/resource");
-// // System.Console.WriteLine(await response.Content.ReadAsStringAsync());
-
-// var result = await client.DeleteAsync("ip/firewall/address-list/*1");
-// //{"detail":"not enough permissions (9)","error":500,"message":"Internal Server Error"}
-// System.Console.WriteLine(await result.Content.ReadAsStringAsync());
-
-// var response = await client.GetAsync("ip/firewall/address-list?.proplist=.id,address,list");
-// System.Console.WriteLine(await response.Content.ReadAsStringAsync());

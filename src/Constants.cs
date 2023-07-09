@@ -8,9 +8,9 @@ public static class C
     public static readonly string MaxMindLicenseKey;
     public static readonly int MaxMindMinAge;
     public static readonly HashSet<string> Countries = new();
-    public static readonly string MikrotikAuth;
+    public static readonly string MikrotikAuth = string.Empty;
     public static readonly string MikrotikIp;
-    public static readonly string? MikrotikComment;
+    public static readonly string? MikrotikComment = nameof(geosvc);
     static C()
     {
         IsDebug = Environment.GetEnvironmentVariable("DEBUG") == "1";
